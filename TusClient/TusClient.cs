@@ -114,15 +114,15 @@ namespace TusClient
             }
         }
         //------------------------------------------------------------------------------------------------
-        public void Upload(string URL, System.IO.FileInfo file)
+        public TusHTTPResponse Upload(string URL, System.IO.FileInfo file)
         {
             using (var fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read))
             {
-                Upload(URL, fs);
+                return Upload(URL, fs);
             }
 
         }
-        public void Upload(string URL, System.IO.Stream fs)
+        public TusHTTPResponse Upload(string URL, System.IO.Stream fs)
         {
 
             var Offset = this.getFileOffset(URL);
@@ -198,7 +198,8 @@ namespace TusClient
 
 
                 }
-            
+
+            return this.GetUploadedFileInfo(URL);
         }
         //------------------------------------------------------------------------------------------------
         public TusHTTPResponse Download(string URL)
@@ -306,6 +307,27 @@ namespace TusClient
                 return false;
             }
         }
+        //------------------------------------------------------------------------------------------------
+
+        public TusHTTPResponse GetUploadedFileInfo(string URL)
+        {
+            var client = new TusHTTPClient();
+            var request = new TusHTTPRequest(URL);
+            request.Method = "GET";
+            request.AddHeader("Tus-Resumable", "1.0.0");
+
+            var response = client.PerformRequest(request);
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return response;
+            }
+            else
+            {
+                throw new ApplicationException();
+            }
+        }
+
         // ***********************************************************************************************
         // Internal
         //------------------------------------------------------------------------------------------------
