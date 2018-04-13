@@ -1,7 +1,7 @@
 ﻿Module Module1
 
     Sub Main()
-        StartTusdServer()
+        'StartTusdServer()
 
         'UploadExampleMinimal()
         'UploadExampleStream()
@@ -12,14 +12,14 @@
 
 
 
-        StopTusdServer()
+        'StopTusdServer()
         Console.WriteLine("Press the any key")
         Console.ReadKey()
     End Sub
 
     '********************************************************************************************************************
     Private TusServerProcess As Process
-    Private Property ServerURL As String = "http://127.0.0.1:1080/files/"
+    Private Property ServerURL As String = "http://localhost:8080/upload/2222"
     '********************************************************************************************************************
     Private Sub UploadExampleMinimal()
         Dim testfile = GenFileText(sizeInMb:=32)
