@@ -99,8 +99,8 @@ namespace TusClient
                 request.AutomaticDecompression = DecompressionMethods.GZip;
 
 
-                var cx1 = request.CookieContainer.GetCookies(req.URL);
-                var cx2 = cx1.Cast<Cookie>().Single(xx1 => xx1.Name == "auth").Value;
+                var cx1 = request.CookieContainer?.GetCookies(req.URL);
+                var cx2 = cx1?.Cast<Cookie>().SingleOrDefault(xx1 => xx1.Name == "auth")?.Value;
                 //var cx = request.CookieContainer.GetCookies(req.URL).Cast<Cookie>().Single(xx1 => xx1.Name == "auth").Value;
                 // 
 
@@ -179,7 +179,7 @@ namespace TusClient
 
                 req.FireDownloading(0, 0);
 
-                HttpWebResponse response = (HttpWebResponse)request.GetResponseAsync().Result;
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
 
                 contentlength = 0;

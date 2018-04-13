@@ -22,6 +22,9 @@ namespace TusClient
         public delegate void DownloadingEvent(long bytesTransferred, long bytesTotal);
         public event DownloadingEvent Downloading;
 
+        public CookieContainer CookieContainer { get; private set; }
+
+
         // ***********************************************************************************************
         // Private
         //------------------------------------------------------------------------------------------------
@@ -34,9 +37,9 @@ namespace TusClient
 
         public IWebProxy Proxy { get; set; }
 
-        public TusClient()
+        public TusClient(CookieContainer cookieContainer = null)
         {
-            
+            this.CookieContainer = cookieContainer;
         }
 
         public void Cancel()
@@ -56,15 +59,15 @@ namespace TusClient
             }
             return Create(URL, file.Length, metadata);
         }
-        public string Create(string URL, long UploadLength, Dictionary<string, string> metadata = null, CookieContainer cookieContainer = null)
+        public string Create(string URL, long UploadLength, Dictionary<string, string> metadata = null)
         {
             var requestUri = new Uri(URL);
             var client = new TusHTTPClient();
-            client.CookieContainer = cookieContainer;
+            client.CookieContainer = this.CookieContainer;
             client.Proxy = this.Proxy;
 
             var request = new TusHTTPRequest(URL);
-            request.CookieContainer = cookieContainer;
+            request.CookieContainer = this.CookieContainer;
             request.Method = "POST";
             request.AddHeader("Tus-Resumable", "1.0.0");
             request.AddHeader("Upload-Length", UploadLength.ToString());
@@ -125,12 +128,12 @@ namespace TusClient
             }
 
         }
-        public TusHTTPResponse Upload(string URL, System.IO.Stream fs, CookieContainer cookieContainer = null)
+        public TusHTTPResponse Upload(string URL, System.IO.Stream fs)
         {
 
             var Offset = this.getFileOffset(URL);
             var client = new TusHTTPClient();
-            client.CookieContainer = cookieContainer;
+            client.CookieContainer = this.CookieContainer;
             System.Security.Cryptography.SHA1 sha = new System.Security.Cryptography.SHA1Managed();
             int ChunkSize = (int) Math.Ceiling(3 * 1024.0 * 1024.0); //3 mb
 
@@ -151,6 +154,7 @@ namespace TusClient
                     var sha1hash = sha.ComputeHash(buffer);
 
                     var request = new TusHTTPRequest(URL);
+                request.CookieContainer = this.CookieContainer;
                     request.cancelToken = this.cancelSource.Token;
                     request.Method = "PATCH";
                     request.AddHeader("Tus-Resumable", "1.0.0");
@@ -338,7 +342,9 @@ namespace TusClient
         private long getFileOffset(string URL)
         {
             var client = new TusHTTPClient();
+            client.CookieContainer = this.CookieContainer;
             var request = new TusHTTPRequest(URL);
+            request.CookieContainer = this.CookieContainer;
             request.Method = "HEAD";
             request.AddHeader("Tus-Resumable", "1.0.0");
 
