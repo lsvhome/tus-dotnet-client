@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 
@@ -55,13 +56,15 @@ namespace TusClient
             }
             return Create(URL, file.Length, metadata);
         }
-        public string Create(string URL, long UploadLength, Dictionary<string, string> metadata = null)
+        public string Create(string URL, long UploadLength, Dictionary<string, string> metadata = null, CookieContainer cookieContainer = null)
         {
             var requestUri = new Uri(URL);
             var client = new TusHTTPClient();
+            client.CookieContainer = cookieContainer;
             client.Proxy = this.Proxy;
 
             var request = new TusHTTPRequest(URL);
+            request.CookieContainer = cookieContainer;
             request.Method = "POST";
             request.AddHeader("Tus-Resumable", "1.0.0");
             request.AddHeader("Upload-Length", UploadLength.ToString());
@@ -122,11 +125,12 @@ namespace TusClient
             }
 
         }
-        public TusHTTPResponse Upload(string URL, System.IO.Stream fs)
+        public TusHTTPResponse Upload(string URL, System.IO.Stream fs, CookieContainer cookieContainer = null)
         {
 
             var Offset = this.getFileOffset(URL);
             var client = new TusHTTPClient();
+            client.CookieContainer = cookieContainer;
             System.Security.Cryptography.SHA1 sha = new System.Security.Cryptography.SHA1Managed();
             int ChunkSize = (int) Math.Ceiling(3 * 1024.0 * 1024.0); //3 mb
 

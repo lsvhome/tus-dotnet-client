@@ -14,4 +14,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\FexSync.Logging\FexSync.Logging.csproj" />
+    <ProjectReference Include="..\..\logging-log4net\src\log4net.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -4,6 +4,13 @@ using System.IO;
 using System.Net;
 using System.Threading;
 
+using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+
 namespace TusClient
 {
     public class TusHTTPRequest
@@ -20,6 +27,9 @@ namespace TusClient
         public byte[] BodyBytes { get; set; }
 
         public CancellationToken cancelToken;
+
+
+        public CookieContainer CookieContainer { get; set; }
 
         public string BodyText
         {
@@ -72,7 +82,8 @@ namespace TusClient
     {
 
         public IWebProxy Proxy { get; set; }
-        
+
+        public CookieContainer CookieContainer { get; set; }
 
         public TusHTTPResponse PerformRequest(TusHTTPRequest req)
         {
@@ -81,9 +92,18 @@ namespace TusClient
             {
                 var instream = new MemoryStream(req.BodyBytes);
 
-                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(req.URL);
+                //HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(req.URL);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(req.URL);
+
+                request.CookieContainer = this.CookieContainer;
                 request.AutomaticDecompression = DecompressionMethods.GZip;
-                
+
+
+                var cx1 = request.CookieContainer.GetCookies(req.URL);
+                var cx2 = cx1.Cast<Cookie>().Single(xx1 => xx1.Name == "auth").Value;
+                //var cx = request.CookieContainer.GetCookies(req.URL).Cast<Cookie>().Single(xx1 => xx1.Name == "auth").Value;
+                // 
+
                 request.Timeout = System.Threading.Timeout.Infinite;
                 request.ReadWriteTimeout = System.Threading.Timeout.Infinite;
                 request.Method = req.Method;
@@ -159,7 +179,7 @@ namespace TusClient
 
                 req.FireDownloading(0, 0);
 
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                HttpWebResponse response = (HttpWebResponse)request.GetResponseAsync().Result;
 
 
                 contentlength = 0;
@@ -209,6 +229,7 @@ namespace TusClient
             catch (WebException ex)
             {
                 TusException rex = new TusException(ex);
+                rex.Process();
                 throw rex;
             }
         }
@@ -293,6 +314,18 @@ namespace TusClient
         }
 
     }
-}
+
+
+    public static class Extenders
+    {
+        internal static void Process(this Exception exception)
+        {
+            System.Diagnostics.Trace.WriteLine($"{DateTime.Now.ToString("HH:mm:ss:ffff")} {exception.ToString()}");
+#if DEBUG
+            System.Diagnostics.Debugger.Break();
+#endif
+        }
+    }
+    }
 
 
