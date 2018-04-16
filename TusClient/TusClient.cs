@@ -320,7 +320,9 @@ namespace TusClient
         public TusHTTPResponse GetUploadedFileInfo(string URL)
         {
             var client = new TusHTTPClient();
+            client.CookieContainer = this.CookieContainer;
             var request = new TusHTTPRequest(URL);
+            request.CookieContainer = this.CookieContainer;
             request.Method = "GET";
             request.AddHeader("Tus-Resumable", "1.0.0");
 
