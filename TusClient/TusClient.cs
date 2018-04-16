@@ -323,7 +323,7 @@ namespace TusClient
             client.CookieContainer = this.CookieContainer;
             var request = new TusHTTPRequest(URL);
             request.CookieContainer = this.CookieContainer;
-            request.Method = "GET";
+            request.Method = "HEAD";
             request.AddHeader("Tus-Resumable", "1.0.0");
 
             var response = client.PerformRequest(request);
