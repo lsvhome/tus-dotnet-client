@@ -172,13 +172,18 @@ namespace TusClient
                     try
                     {
                         var response = client.PerformRequest(request);
-                        result = response;
+                        
 
                     if (response.StatusCode == HttpStatusCode.NoContent)
                         {
                             Offset += BytesRead;
                         }
-                        else
+                    else if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        Offset += BytesRead;
+                        result = response;
+                    }
+                    else
                         {
                             throw new Exception("WriteFileInServer failed. " + response.ResponseString);
                         }
