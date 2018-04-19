@@ -130,7 +130,7 @@ namespace TusClient
         }
         public TusHTTPResponse Upload(string URL, System.IO.Stream fs)
         {
-
+            TusHTTPResponse result = null;
             var Offset = this.getFileOffset(URL);
             var client = new TusHTTPClient();
             client.CookieContainer = this.CookieContainer;
@@ -172,8 +172,9 @@ namespace TusClient
                     try
                     {
                         var response = client.PerformRequest(request);
+                        result = response;
 
-                        if (response.StatusCode == HttpStatusCode.NoContent)
+                    if (response.StatusCode == HttpStatusCode.NoContent)
                         {
                             Offset += BytesRead;
                         }
@@ -206,8 +207,10 @@ namespace TusClient
 
 
                 }
+            System.Diagnostics.Debug.Assert(!string.IsNullOrWhiteSpace(result.ResponseString));
+            System.Diagnostics.Debug.Assert(result.ResponseBytes.Length > 0);
 
-            return this.GetUploadedFileInfo(URL);
+            return result;
         }
         //------------------------------------------------------------------------------------------------
         public TusHTTPResponse Download(string URL)
